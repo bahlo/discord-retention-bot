@@ -10,3 +10,5 @@ edition = "2018"
 dotenv = "0.15.0"
 log = "0.4.11"
 env_logger = "0.8.2"
+serenity = "0.9"
+tokio = { version = "0.2", features = ["macros"] }
