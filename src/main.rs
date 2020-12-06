@@ -1,22 +1,9 @@
 use dotenv::dotenv;
-use log::debug;
-use serenity::async_trait;
-use serenity::client::{Client, Context, EventHandler};
-use serenity::framework::standard::{
-    macros::{command, group},
-    CommandResult, StandardFramework,
-};
-use serenity::model::channel::Message;
+use log::info;
+use serenity::http::client::Http;
+use serenity::http::GuildPagination;
+use serenity::model::id::GuildId;
 use std::env;
-
-#[group]
-#[commands(ping)]
-struct General;
-
-struct Handler;
-
-#[async_trait]
-impl EventHandler for Handler {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,23 +11,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let discord_token = env::var("DISCORD_TOKEN")?;
+    let http_client = Http::new_with_token(&discord_token);
 
-    let framework = StandardFramework::new()
-        .configure(|c| c.prefix("~")) // set the bot's prefix to "~"
-        .group(&GENERAL_GROUP);
-
-    let mut client = Client::builder(discord_token)
-        .event_handler(Handler)
-        .framework(framework)
+    let guilds = http_client
+        .get_guilds(&GuildPagination::After(GuildId(0)), 32)
         .await?;
-
-    // start listening for events by starting a single shard
-    client.start().await?;
-    Ok(())
-}
-
-#[command]
-async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    msg.reply(ctx, "Pong!").await?;
+    info!("guilds: {:?}", guilds);
     Ok(())
 }
