@@ -14,8 +14,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let http_client = Http::new_with_token(&discord_token);
 
     let guilds = http_client
-        .get_guilds(&GuildPagination::After(GuildId(0)), 32)
+        .get_guilds(&GuildPagination::After(GuildId(0)), 1)
         .await?;
-    info!("guilds: {:?}", guilds);
+    let first_guild = guilds.get(0).expect("No guild provided"); // TODO: Support multiple guilds
+    info!("guild: {:?}", first_guild);
+
+    let channels = http_client.get_channels(*first_guild.id.as_u64()).await?;
+    info!("channels: {:?}", channels);
+
     Ok(())
 }
