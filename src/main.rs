@@ -23,8 +23,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!("channels: {:?}", channels);
 
     for channel in channels {
-        let messages = http_client.get_messages(*channel.id.as_u64(), "").await?;
-        info!("messages: {:?}", messages);
+        let messages = http_client
+            .get_messages(*channel.id.as_u64(), "?limit=100")
+            .await?;
+        info!("got {} messages in {}", messages.len(), channel.name);
     }
 
     Ok(())
