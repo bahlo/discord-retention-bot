@@ -8,17 +8,39 @@ use serenity::model::channel::{GuildChannel, Message};
 use serenity::model::guild::GuildInfo;
 use serenity::model::id::GuildId;
 use std::env;
+use std::error::Error;
+use std::fmt;
+
+#[derive(Debug)]
+struct InvalidDurationError {}
+
+impl fmt::Display for InvalidDurationError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Invalid duration, possible suffixes: d, w")
+    }
+}
+
+impl Error for InvalidDurationError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
     env_logger::init();
 
     let discord_token = env::var("DISCORD_TOKEN")?;
-    let client = Http::new_with_token(&discord_token);
 
-    // TODO: Make configurable
-    let max_age = Duration::weeks(2);
+    let mut max_age_str = env::var("MAX_AGE")?;
+    let max_age = match max_age_str.pop().ok_or(InvalidDurationError {})? {
+        'd' => Duration::days(max_age_str.parse::<i64>()?),
+        'w' => Duration::weeks(max_age_str.parse::<i64>()?),
+        _ => Duration::weeks(2), // Default to two weeks
+    };
+
+    let client = Http::new_with_token(&discord_token);
 
     let guilds = client
         .get_guilds(&GuildPagination::After(GuildId(0)), 1)
@@ -38,7 +60,7 @@ async fn process_guild(
     client: &Http,
     guild: &GuildInfo,
     max_age: Duration,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn Error>> {
     let channels = client.get_channels(*guild.id.as_u64()).await?;
     for channel in channels {
         if let Err(e) = process_channel(client, &channel, max_age).await {
@@ -55,7 +77,7 @@ async fn process_channel(
     client: &Http,
     channel: &GuildChannel,
     max_age: Duration,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn Error>> {
     let first_batch = client
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await?;
