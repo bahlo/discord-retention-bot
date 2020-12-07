@@ -9,22 +9,10 @@ use serenity::model::guild::GuildInfo;
 use serenity::model::id::GuildId;
 use std::env;
 use std::error::Error;
-use std::fmt;
 
-#[derive(Debug)]
-struct InvalidDurationError {}
+mod errors;
 
-impl fmt::Display for InvalidDurationError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Invalid duration, possible suffixes: d, w")
-    }
-}
-
-impl Error for InvalidDurationError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        None
-    }
-}
+use errors::*;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
