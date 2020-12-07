@@ -2,6 +2,7 @@ use chrono::prelude::*;
 use chrono::Duration;
 use dotenv::dotenv;
 use log::{error, info};
+use serde_json::json;
 use serenity::http::client::Http;
 use serenity::http::GuildPagination;
 use serenity::model::channel::{GuildChannel, Message};
@@ -51,7 +52,7 @@ async fn process_guild(
 ) -> Result<(), Box<dyn Error>> {
     let channels = client.get_channels(*guild.id.as_u64()).await?;
     for channel in channels {
-        if let Err(e) = process_channel(client, &channel, max_age).await {
+        if let Err(e) = process_channel(client, guild, &channel, max_age).await {
             error!(
                 "Could not process channel {} in guild {}: {:?}",
                 channel.name, guild.name, e
@@ -63,6 +64,7 @@ async fn process_guild(
 
 async fn process_channel(
     client: &Http,
+    guild: &GuildInfo,
     channel: &GuildChannel,
     max_age: Duration,
 ) -> Result<(), Box<dyn Error>> {
@@ -85,8 +87,15 @@ async fn process_channel(
         oldest_msg = batch.last();
     }
 
-    // TODO: Delete messages with ids
-    info!("Message ids to be deleted: {:?}", message_ids_to_delete);
+    info!(
+        "Deleting {} messages from {} in {}",
+        message_ids_to_delete.len(),
+        channel.name,
+        guild.name
+    );
+    client
+        .delete_messages(*channel.id.as_u64(), json!(message_ids_to_delete))
+        .await?;
 
     Ok(())
 }
