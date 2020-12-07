@@ -1,0 +1,20 @@
+on:
+  push:
+    tags:
+    - 'v*'
+
+name: release
+
+jobs:
+  docker:
+    name: "Publish docker image"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Login
+      run: docker login docker.pkg.github.com -u bahlo -p "${{ secrets.GITHUB_TOKEN }}"
+    - name: Build and publish image
+      run: |
+        export TAG=$(echo "${{ github.ref }}" | sed 's/^refs\/tags\/v//g')
+        docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:$TAG .
+        docker push docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:$TAG
