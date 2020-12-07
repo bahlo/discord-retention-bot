@@ -4,11 +4,35 @@
 A discord bot that allows you to set a retention for different channels (similar to Slack)
 
 ## Install
+### Preparation
+Before running your bot you need to create it on Discord:
+
 1. Create a Discord Application in the 
    [Discord Developer Portal](https://discord.com/developers/applications)
 2. Copy the client id from the "General information" tab
 3. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
    and add your Bot to your discord server.
+
+### Install
+
+#### Download binary
+Go to the [GitHub Releases](https://github.com/bahlo/discord-retention-bot/releases)
+and download the binary for your architecture.
+
+#### Docker
+You can use the provided Docker image 
+(`github.com/bahlo/discord-retention-bot/bot`) for easy setup, it doesn't need 
+anything but internet access and the provided environment variables 
+(see [#Configuration](Configuration)).
+
+#### Build from source
+
+1. Clone the repository with 
+   `git clone https://github.com/bahlo/discord-retention-bot`
+2. Export the environment variables or write them to `.env` (see 
+   [#Configuration](Configuration))
+3. Run `cargo build --release` to build your binary to 
+   `target/release/discord-retention-bot`
 
 ### What does 74752 mean?
 74752 is the bot permission bitmask for the following permissions:
