@@ -15,3 +15,21 @@ impl Error for InvalidDurationError {
         None
     }
 }
+
+#[derive(Debug)]
+pub struct InvalidChannelConfigError {}
+
+impl fmt::Display for InvalidChannelConfigError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Invalid channel configuration, format: $name:$duration,..."
+        )
+    }
+}
+
+impl Error for InvalidChannelConfigError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}

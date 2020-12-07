@@ -20,7 +20,7 @@ Configuration is happening via environment variables (optionally via `.env`).
 
 * `RUST_LOG` defines the log level (I recommend setting this to `INFO`)
 * `DISCORD_TOKEN` is the token of your Discord bot
-* `RETENTION` is a list of channel names and the duration to keep, separated by
+* `CHANNEL_RETENTION` is a list of channel names and the duration to keep, separated by
   a comma. For example: `general:2w,random:4d`. 
 
 ## Troubleshooting

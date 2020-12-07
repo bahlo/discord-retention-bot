@@ -7,6 +7,7 @@ use serenity::http::GuildPagination;
 use serenity::model::channel::{GuildChannel, Message};
 use serenity::model::guild::GuildInfo;
 use serenity::model::id::GuildId;
+use std::collections::HashMap;
 use std::env;
 use std::error::Error;
 
@@ -21,12 +22,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let discord_token = env::var("DISCORD_TOKEN")?;
 
-    let mut max_age_str = env::var("MAX_AGE")?;
-    let max_age = match max_age_str.pop().ok_or(InvalidDurationError {})? {
-        'd' => Duration::days(max_age_str.parse::<i64>()?),
-        'w' => Duration::weeks(max_age_str.parse::<i64>()?),
-        _ => Duration::weeks(2), // Default to two weeks
-    };
+    // Parse CHANNEL_RETENTION env
+    let mut channel_retention = HashMap::new();
+    for channel in env::var("CHANNEL_RETENTION")?.split(",") {
+        let parts: Vec<&str> = channel.split(":").collect();
+        let channel_name = parts
+            .get(0)
+            .and_then(|str| Some(str.to_string()))
+            .ok_or(InvalidChannelConfigError {})?;
+        let mut channel_duration_str = parts
+            .get(1)
+            .and_then(|str| Some(str.to_string()))
+            .ok_or(InvalidChannelConfigError {})?;
+        let channel_duration = match channel_duration_str.pop().ok_or(InvalidDurationError {})? {
+            'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
+            'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
+            _ => Err(InvalidDurationError {}),
+        }?;
+        channel_retention.insert(channel_name, channel_duration);
+    }
 
     let client = Http::new_with_token(&discord_token);
 
@@ -36,7 +50,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     for guild in guilds {
         info!("Processing guild {}", guild.name);
-        if let Err(e) = process_guild(&client, &guild, max_age).await {
+        if let Err(e) = process_guild(&client, &guild, &channel_retention).await {
             error!("Could not process guild {}: {:?}", guild.name, e)
         }
     }
@@ -47,11 +61,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
 async fn process_guild(
     client: &Http,
     guild: &GuildInfo,
-    max_age: Duration,
+    channel_retention: &HashMap<String, Duration>,
 ) -> Result<(), Box<dyn Error>> {
     let channels = client.get_channels(*guild.id.as_u64()).await?;
     for channel in channels {
-        if let Err(e) = process_channel(client, guild, &channel, max_age).await {
+        let max_age = match channel_retention.get(&channel.name) {
+            Some(max_age) => max_age,
+            None => continue,
+        };
+
+        if let Err(e) = process_channel(client, guild, &channel, *max_age).await {
             error!(
                 "Could not process channel {} in guild {}: {:?}",
                 channel.name, guild.name, e
