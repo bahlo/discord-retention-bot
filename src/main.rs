@@ -21,26 +21,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     env_logger::init();
 
     let discord_token = env::var("DISCORD_TOKEN")?;
-
-    // Parse CHANNEL_RETENTION env
-    let mut channel_retention = HashMap::new();
-    for channel in env::var("CHANNEL_RETENTION")?.split(",") {
-        let parts: Vec<&str> = channel.split(":").collect();
-        let channel_name = parts
-            .get(0)
-            .and_then(|str| Some(str.to_string()))
-            .ok_or(InvalidChannelConfigError {})?;
-        let mut channel_duration_str = parts
-            .get(1)
-            .and_then(|str| Some(str.to_string()))
-            .ok_or(InvalidChannelConfigError {})?;
-        let channel_duration = match channel_duration_str.pop().ok_or(InvalidDurationError {})? {
-            'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
-            'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
-            _ => Err(InvalidDurationError {}),
-        }?;
-        channel_retention.insert(channel_name, channel_duration);
-    }
+    let channel_retention = parse_channel_retention(env::var("CHANNEL_RETENTION")?)?;
 
     let client = Http::new_with_token(&discord_token);
 
@@ -117,6 +98,28 @@ async fn process_channel(
     }
 
     Ok(())
+}
+
+fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>, Box<dyn Error>> {
+    let mut channel_retention = HashMap::new();
+    for channel in input.split(",") {
+        let parts: Vec<&str> = channel.split(":").collect();
+        let channel_name = parts
+            .get(0)
+            .and_then(|str| Some(str.to_string()))
+            .ok_or(InvalidChannelConfigError {})?;
+        let mut channel_duration_str = parts
+            .get(1)
+            .and_then(|str| Some(str.to_string()))
+            .ok_or(InvalidChannelConfigError {})?;
+        let channel_duration = match channel_duration_str.pop().ok_or(InvalidDurationError {})? {
+            'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
+            'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
+            _ => Err(InvalidDurationError {}),
+        }?;
+        channel_retention.insert(channel_name, channel_duration);
+    }
+    Ok(channel_retention)
 }
 
 fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
