@@ -1,4 +1,5 @@
-# discord-retention-bot ![ci](https://github.com/bahlo/discord-retention-bot/workflows/ci/badge.svg)
+# discord-retention-bot 
+![ci](https://github.com/bahlo/discord-retention-bot/workflows/ci/badge.svg)
 A discord bot that allows you to set a retention for different channels (similar to Slack)
 
 ## Install
@@ -16,12 +17,13 @@ A discord bot that allows you to set a retention for different channels (similar
 
 ## Configuration
 
-Configuration is happening via environment variables (optionally via `.env`).
+Configuration is happening via environment variables or an `.env` file:
 
-* `RUST_LOG` defines the log level (I recommend setting this to `INFO`)
+* `RUST_LOG` defines the log level (I recommend setting this to `info`)
 * `DISCORD_TOKEN` is the token of your Discord bot
 * `CHANNEL_RETENTION` is a list of channel names and the duration to keep, separated by
-  a comma. For example: `general:2w,random:4d`. 
+  a comma. For example: `general:2w,random:4d` (currently the duration only 
+  support s`d` and `w`, please open an issue if you need another one)
 
 ## Troubleshooting
 ### Why is it taking so long?
@@ -30,4 +32,8 @@ delete endpoint because [Bulk Delete Messages](https://discord.com/developers/do
 It might take a while the first time, but it will get faster.
 
 ## It's not deleting the messages of a channel
-Make sure the bot has access to that channel in the Discord application.
+Make sure the bot has access to that channel in the Discord application and the 
+following permissions:
+* Read Text Channels & See Voice Channels
+* Manage Messages
+* Read Message History
