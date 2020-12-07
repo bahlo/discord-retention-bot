@@ -70,9 +70,19 @@ async fn process_channel(
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await?;
 
-    let message_ids_to_delete: Vec<u64> = filter_messages(first_batch, max_age);
+    let message_ids_to_delete: Vec<u64> = filter_messages(&first_batch, max_age);
 
-    // TODO: Implement pagination loop to get all messages, append to message_ids_to_delet
+    let mut oldest = first_batch.last();
+    while let Some(before_msg) = oldest {
+        let batch = client
+            .get_messages(
+                *channel.id.as_u64(),
+                format!("?limit=100&before={}", before_msg.id.as_u64()),
+            )
+            .await?;
+        message_ids_to_delete.append(&mut filter_messages(&batch, max_age));
+        oldest = batch.last();
+    }
 
     // TODO: Delete messages with ids
     info!("Message ids to be deleted: {:?}", message_ids_to_delete);
@@ -80,7 +90,7 @@ async fn process_channel(
     Ok(())
 }
 
-fn filter_messages(messages: Vec<Message>, max_age: Duration) -> Vec<u64> {
+fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
     let now = Utc::now();
     messages
         .into_iter()
