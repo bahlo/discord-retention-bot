@@ -1,5 +1,6 @@
 # discord-retention-bot 
 ![ci](https://github.com/bahlo/discord-retention-bot/workflows/ci/badge.svg)
+![release](https://github.com/bahlo/discord-retention-bot/workflows/release/badge.svg)
 
 A discord bot that allows you to set a retention for different channels (similar to Slack)
 
