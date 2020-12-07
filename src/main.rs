@@ -70,18 +70,19 @@ async fn process_channel(
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await?;
 
-    let message_ids_to_delete: Vec<u64> = filter_messages(&first_batch, max_age);
+    let mut message_ids_to_delete: Vec<u64> = filter_messages(&first_batch, max_age);
 
-    let mut oldest = first_batch.last();
-    while let Some(before_msg) = oldest {
-        let batch = client
+    let mut oldest_msg = first_batch.last();
+    let mut batch: Vec<Message> = vec![];
+    while let Some(before_msg) = oldest_msg {
+        batch = client
             .get_messages(
                 *channel.id.as_u64(),
-                format!("?limit=100&before={}", before_msg.id.as_u64()),
+                &format!("?limit=100&before={}", before_msg.id.as_u64()),
             )
             .await?;
         message_ids_to_delete.append(&mut filter_messages(&batch, max_age));
-        oldest = batch.last();
+        oldest_msg = batch.last();
     }
 
     // TODO: Delete messages with ids
