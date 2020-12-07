@@ -2,7 +2,6 @@ use chrono::prelude::*;
 use chrono::Duration;
 use dotenv::dotenv;
 use log::{error, info};
-use serde_json::json;
 use serenity::http::client::Http;
 use serenity::http::GuildPagination;
 use serenity::model::channel::{GuildChannel, Message};
@@ -93,9 +92,10 @@ async fn process_channel(
         channel.name,
         guild.name
     );
-    client
-        .delete_messages(*channel.id.as_u64(), json!(message_ids_to_delete))
-        .await?;
+    // We can't use bulk here as it's limited to the last two weeks only
+    for msg_id in message_ids_to_delete {
+        client.delete_message(*channel.id.as_u64(), msg_id).await?;
+    }
 
     Ok(())
 }
