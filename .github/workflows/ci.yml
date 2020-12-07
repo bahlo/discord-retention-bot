@@ -45,3 +45,14 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+  docker:
+    name: Build docker container
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Login
+      run: docker login docker.pkg.github.com -u bahlo -p "${{ secrets.GITHUB_TOKEN }}"
+    - name: Build
+      run: docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:latest .
+    - name: Publish
+      run: docker push docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:latest
