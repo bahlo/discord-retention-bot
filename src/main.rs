@@ -10,6 +10,7 @@ use serenity::model::id::GuildId;
 use std::collections::HashMap;
 use std::env;
 use std::error::Error;
+use std::thread;
 
 mod errors;
 
@@ -22,21 +23,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let discord_token = env::var("DISCORD_TOKEN")?;
     let channel_retention = parse_channel_retention(env::var("CHANNEL_RETENTION")?)?;
-
     let client = Http::new_with_token(&discord_token);
+    let interval = Duration::minutes(1).to_std()?;
 
-    let guilds = client
-        .get_guilds(&GuildPagination::After(GuildId(0)), 1)
-        .await?;
+    loop {
+        let guilds = client
+            .get_guilds(&GuildPagination::After(GuildId(0)), 1)
+            .await?;
 
-    for guild in guilds {
-        info!("Processing guild {}", guild.name);
-        if let Err(e) = process_guild(&client, &guild, &channel_retention).await {
-            error!("Could not process guild {}: {:?}", guild.name, e)
+        for guild in guilds {
+            info!("Processing guild {}", guild.name);
+            if let Err(e) = process_guild(&client, &guild, &channel_retention).await {
+                error!("Could not process guild {}: {:?}", guild.name, e)
+            }
         }
-    }
 
-    Ok(())
+        // Sleep a minute, then check again
+        thread::sleep(interval);
+    }
 }
 
 async fn process_guild(
