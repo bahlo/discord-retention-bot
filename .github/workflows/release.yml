@@ -1,9 +1,9 @@
+name: Release
+
 on:
   push:
     tags:
     - 'v*'
-
-name: release
 
 jobs:
   docker:
@@ -46,6 +46,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
+          body: See CHANGELOG.md
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env: 

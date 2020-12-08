@@ -1,6 +1,7 @@
-on: [push]
+name: CI
 
-name: ci
+on: 
+  - push
 
 jobs:
   check:
