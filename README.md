@@ -14,6 +14,12 @@ Before running your bot you need to create it on Discord:
 3. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
    and add your Bot to your discord server.
 
+#### Wait what does 74752 mean?
+74752 is the bitmask for the following permissions:
+* View Channels
+* Manage Messages
+* Read Message History
+
 ### Install
 
 #### Download binary
@@ -21,25 +27,19 @@ Go to the [GitHub Releases](https://github.com/bahlo/discord-retention-bot/relea
 and download the binary for your architecture.
 
 #### Docker
-You can use the provided Docker image 
-(`github.com/bahlo/discord-retention-bot/bot`) for easy setup, it doesn't need 
-anything but internet access and the provided environment variables 
-(see [#Configuration](Configuration)).
+You can use the provided Docker image at
+`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.0`, 
+it only needs internet access and the provided environment variables 
+(see [Configuration](#Configuration)).
 
 #### Build from source
 
 1. Clone the repository with 
    `git clone https://github.com/bahlo/discord-retention-bot`
 2. Export the environment variables or write them to `.env` (see 
-   [#Configuration](Configuration))
+   [Configuration](#Configuration))
 3. Run `cargo build --release` to build your binary to 
    `target/release/discord-retention-bot`
-
-### What does 74752 mean?
-74752 is the bot permission bitmask for the following permissions:
-* View Channels
-* Manage Messages
-* Read Message History
 
 ## Configuration
 
