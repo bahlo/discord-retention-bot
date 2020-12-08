@@ -122,15 +122,18 @@ fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>> {
         let channel_name = parts
             .get(0)
             .and_then(|str| Some(str.to_string()))
-            .ok_or(InvalidChannelConfigError {})?;
+            .ok_or(ParseChannelConfigError::InvalidFormat)?;
         let mut channel_duration_str = parts
             .get(1)
             .and_then(|str| Some(str.to_string()))
-            .ok_or(InvalidChannelConfigError {})?;
-        let channel_duration = match channel_duration_str.pop().ok_or(InvalidDurationError {})? {
+            .ok_or(ParseChannelConfigError::InvalidFormat)?;
+        let channel_duration = match channel_duration_str
+            .pop()
+            .ok_or(ParseChannelConfigError::NoDurationSuffix)?
+        {
             'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
             'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
-            _ => Err(InvalidDurationError {}),
+            other => Err(ParseChannelConfigError::InvalidDurationSuffix(other)),
         }?;
         channel_retention.insert(channel_name, channel_duration);
     }
