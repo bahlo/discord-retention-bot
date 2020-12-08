@@ -29,17 +29,13 @@ and download the binary for your architecture.
 
 #### Docker
 You can use the provided Docker image at
-`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.0`, 
-it only needs internet access and the provided environment variables 
-(see [Configuration](#Configuration)).
+`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.0`.
 
 #### Build from source
 
 1. Clone the repository with 
    `git clone https://github.com/bahlo/discord-retention-bot`
-2. Export the environment variables or write them to `.env` (see 
-   [Configuration](#Configuration))
-3. Run `cargo build --release` to build your binary to 
+2. Run `cargo build --release` to build your binary to 
    `target/release/discord-retention-bot`
 
 ## Configuration
