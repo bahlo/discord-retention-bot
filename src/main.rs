@@ -12,9 +12,8 @@ use std::collections::HashMap;
 use std::env;
 use std::thread;
 
+mod config;
 mod errors;
-
-use errors::*;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -24,7 +23,7 @@ async fn main() -> Result<()> {
     let discord_token = env::var("DISCORD_TOKEN").context("DISCORD_TOKEN is unset")?;
     let channel_retention_env =
         env::var("CHANNEL_RETENTION").context("CHANNEL_RETENTION is unset")?;
-    let channel_retention = parse_channel_retention(channel_retention_env)
+    let channel_retention = config::parse_channel_retention(channel_retention_env)
         .context("Could not parse channel retention")?;
     let client = Http::new_with_token(&discord_token);
     let interval = Duration::minutes(1).to_std()?;
@@ -97,31 +96,6 @@ async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duratio
     }
 
     Ok(())
-}
-
-fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>> {
-    let mut channel_retention = HashMap::new();
-    for channel in input.split(",") {
-        let parts: Vec<&str> = channel.split(":").collect();
-        let channel_name = parts
-            .get(0)
-            .and_then(|str| Some(str.to_string()))
-            .ok_or(ParseChannelConfigError::InvalidFormat)?;
-        let mut channel_duration_str = parts
-            .get(1)
-            .and_then(|str| Some(str.to_string()))
-            .ok_or(ParseChannelConfigError::InvalidFormat)?;
-        let channel_duration = match channel_duration_str
-            .pop()
-            .ok_or(ParseChannelConfigError::NoDurationSuffix)?
-        {
-            'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
-            'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
-            other => Err(ParseChannelConfigError::InvalidDurationSuffix(other)),
-        }?;
-        channel_retention.insert(channel_name, channel_duration);
-    }
-    Ok(channel_retention)
 }
 
 fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
