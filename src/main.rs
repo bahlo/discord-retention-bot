@@ -114,21 +114,19 @@ async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duratio
         .await
         .context("Could not delete messages")?;
 
-    let mut oldest_msg = first_batch.last();
-    #[allow(unused_assignments)] // TODO: Get rid of this and the batch var
-    let mut batch: Vec<Message> = vec![];
-    while let Some(before_msg) = oldest_msg {
-        batch = client
+    let mut oldest_msg_id = first_batch.last().map(|msg| *msg.id.as_u64());
+    while let Some(before_msg_id) = oldest_msg_id {
+        let batch = client
             .get_messages(
                 *channel.id.as_u64(),
-                &format!("?limit=100&before={}", before_msg.id.as_u64()),
+                &format!("?limit=100&before={}", before_msg_id),
             )
             .await
             .context("Could not get messages")?;
         deletion_count += delete_messages(client, channel, filter_messages(&batch, max_age))
             .await
             .context("Could not delete messages")?;
-        oldest_msg = batch.last();
+        oldest_msg_id = batch.last().map(|msg| *msg.id.as_u64());
     }
 
     Ok(deletion_count)
