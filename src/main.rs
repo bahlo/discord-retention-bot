@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use chrono::{prelude::*, Duration};
 use dotenv::dotenv;
+use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
 use serenity::{
     http::{client::Http, GuildPagination},
@@ -31,10 +32,14 @@ async fn main() -> Result<()> {
     loop {
         let guilds = get_all_guilds(&client).await?;
 
+        let mut guild_futures = FuturesUnordered::new();
         for guild in guilds {
-            info!("Processing guild {}", guild.name);
-            if let Err(e) = process_guild(&client, &guild, &channel_retention).await {
-                error!("Could not process guild {}: {:?}", guild.name, e)
+            guild_futures.push(process_guild(&client, guild, &channel_retention));
+        }
+
+        while let Some(res) = guild_futures.next().await {
+            if let Err(e) = res {
+                error!("Error processing guild: {}", e);
             }
         }
 
@@ -58,9 +63,10 @@ async fn get_all_guilds(client: &Http) -> Result<Vec<GuildInfo>> {
 
 async fn process_guild(
     client: &Http,
-    guild: &GuildInfo,
+    guild: GuildInfo,
     channel_retention: &HashMap<String, Duration>,
 ) -> Result<()> {
+    info!("Processing guild {}", guild.name);
     let channels = client
         .get_channels(*guild.id.as_u64())
         .await

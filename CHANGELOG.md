@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `failure` crate for simpler results and context
 - `thiserror` crate for easier error creation
 - Tests for configuration parsing
+- Concurrent processing of each guild
 ### Changed
 - Unified GitHub Actions workflow
 - Messages are now deleted immediately instead of collecting first
