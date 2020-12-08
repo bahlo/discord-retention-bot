@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use chrono::prelude::*;
 use chrono::Duration;
 use dotenv::dotenv;
@@ -9,7 +10,6 @@ use serenity::model::guild::GuildInfo;
 use serenity::model::id::GuildId;
 use std::collections::HashMap;
 use std::env;
-use std::error::Error;
 use std::thread;
 
 mod errors;
@@ -17,12 +17,15 @@ mod errors;
 use errors::*;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn Error>> {
+async fn main() -> Result<()> {
     dotenv().ok();
     env_logger::init();
 
-    let discord_token = env::var("DISCORD_TOKEN")?;
-    let channel_retention = parse_channel_retention(env::var("CHANNEL_RETENTION")?)?;
+    let discord_token = env::var("DISCORD_TOKEN").context("DISCORD_TOKEN is unset")?;
+    let channel_retention_env =
+        env::var("CHANNEL_RETENTION").context("CHANNEL_RETENTION is unset")?;
+    let channel_retention = parse_channel_retention(channel_retention_env)
+        .context("Could not parse channel retention")?;
     let client = Http::new_with_token(&discord_token);
     let interval = Duration::minutes(1).to_std()?;
 
@@ -38,7 +41,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             }
         }
 
-        // Sleep a minute, then check again
+        info!("Sleeping for {:#?}", interval);
         thread::sleep(interval);
     }
 }
@@ -47,8 +50,11 @@ async fn process_guild(
     client: &Http,
     guild: &GuildInfo,
     channel_retention: &HashMap<String, Duration>,
-) -> Result<(), Box<dyn Error>> {
-    let channels = client.get_channels(*guild.id.as_u64()).await?;
+) -> Result<()> {
+    let channels = client
+        .get_channels(*guild.id.as_u64())
+        .await
+        .context("Could not get channels")?;
     for channel in channels {
         let max_age = match channel_retention.get(&channel.name) {
             Some(max_age) => max_age,
@@ -70,10 +76,11 @@ async fn process_channel(
     guild: &GuildInfo,
     channel: &GuildChannel,
     max_age: Duration,
-) -> Result<(), Box<dyn Error>> {
+) -> Result<()> {
     let first_batch = client
         .get_messages(*channel.id.as_u64(), "?limit=100")
-        .await?;
+        .await
+        .context("Could not get messages")?;
 
     let mut message_ids_to_delete: Vec<u64> = filter_messages(&first_batch, max_age);
 
@@ -85,7 +92,8 @@ async fn process_channel(
                 *channel.id.as_u64(),
                 &format!("?limit=100&before={}", before_msg.id.as_u64()),
             )
-            .await?;
+            .await
+            .context("Could not get messages")?;
         message_ids_to_delete.append(&mut filter_messages(&batch, max_age));
         oldest_msg = batch.last();
     }
@@ -98,13 +106,16 @@ async fn process_channel(
     );
     // We can't use bulk here as it's limited to the last two weeks only
     for msg_id in message_ids_to_delete {
-        client.delete_message(*channel.id.as_u64(), msg_id).await?;
+        client
+            .delete_message(*channel.id.as_u64(), msg_id)
+            .await
+            .context("Could not delete message")?;
     }
 
     Ok(())
 }
 
-fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>, Box<dyn Error>> {
+fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>> {
     let mut channel_retention = HashMap::new();
     for channel in input.split(",") {
         let parts: Vec<&str> = channel.split(":").collect();

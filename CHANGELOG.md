@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Clippy check job
 - Security audit job (runs overnight)
+- `failure` crate for simpler Results and context
 ### Changed
 - Unified GitHub Actions workflow
 
