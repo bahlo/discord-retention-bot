@@ -2,7 +2,8 @@
 ![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)
 ![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)
 
-A discord bot that allows you to set a retention for different channels (similar to Slack)
+A discord bot that allows you to set a retention for different channels (similar 
+to Slack).
 
 ## Install
 ### Preparation
@@ -57,9 +58,14 @@ Discord might be rate-limiting you. This applications uses the single message
 delete endpoint because [Bulk Delete Messages](https://discord.com/developers/docs/resources/channel#bulk-delete-messages) doesn't support messages older than 2 weeks. 
 It might take a while the first time, but it will get faster.
 
-## It's not deleting the messages of a channel
+### It's not deleting the messages of a channel
 Make sure the bot has access to that channel in the Discord application and the 
 following permissions:
 * Read Text Channels & See Voice Channels
 * Manage Messages
 * Read Message History
+
+## Built on the shoulders of giants
+Check the Cargo.toml for all packages used in this project. I just want to 
+highlight [serenity](https://github.com/serenity-rs/serenity), a great library
+for interacting with the Discord API.
