@@ -1,16 +1,16 @@
 use anyhow::{Context, Result};
-use chrono::prelude::*;
-use chrono::Duration;
+use chrono::{prelude::*, Duration};
 use dotenv::dotenv;
 use log::{error, info};
-use serenity::http::client::Http;
-use serenity::http::GuildPagination;
-use serenity::model::channel::{GuildChannel, Message};
-use serenity::model::guild::GuildInfo;
-use serenity::model::id::GuildId;
-use std::collections::HashMap;
-use std::env;
-use std::thread;
+use serenity::{
+    http::{client::Http, GuildPagination},
+    model::{
+        channel::{GuildChannel, Message},
+        guild::GuildInfo,
+        id::GuildId,
+    },
+};
+use std::{collections::HashMap, env, thread};
 
 mod config;
 mod errors;
