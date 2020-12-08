@@ -57,7 +57,13 @@ async fn process_guild(
     for channel in channels {
         let max_age = match channel_retention.get(&channel.name) {
             Some(max_age) => max_age,
-            None => continue,
+            None => {
+                info!(
+                    "Skipping channel {} as there is no configuration",
+                    channel.name
+                );
+                continue;
+            }
         };
 
         if let Err(e) = process_channel(client, &channel, *max_age).await {

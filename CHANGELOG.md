@@ -11,9 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Security audit job (runs overnight)
 - `failure` crate for simpler results and context
 - `thiserror` crate for easier error creation
+- Tests for configuration parsing
 ### Changed
 - Unified GitHub Actions workflow
 - Messages are now deleted immediately instead of collecting first
+- Print message when channel is not in configuration
 
 ## [0.1.0] - 2020-12-08
 ### Added
