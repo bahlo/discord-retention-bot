@@ -18,7 +18,7 @@ pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration
             .ok_or(ParseChannelConfigError::InvalidFormat)?;
         let channel_duration = match channel_duration_str
             .pop()
-            .ok_or(ParseChannelConfigError::NoDurationSuffix)?
+            .ok_or(ParseChannelConfigError::NoDuration)?
         {
             'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
             'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
@@ -27,4 +27,56 @@ pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration
         channel_retention.insert(channel_name, channel_duration);
     }
     Ok(channel_retention)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_channel_retention_simple() {
+        let channel_retention = parse_channel_retention("foo:1d,bar:1w".to_owned()).unwrap();
+        assert_eq!(channel_retention.get("foo").unwrap(), &Duration::days(1));
+        assert_eq!(channel_retention.get("bar").unwrap(), &Duration::weeks(1));
+    }
+
+    #[test]
+    fn test_parse_channel_retention_invalid_duration() {
+        let result = parse_channel_retention("foo:1z".to_owned());
+        if let Err(e) = result {
+            match e.downcast_ref::<ParseChannelConfigError>() {
+                Some(ParseChannelConfigError::InvalidDurationSuffix('z')) => {} // Ok
+                _ => panic!("Expected ParseChannelConfigError::InvalidDurationSuffix"),
+            };
+        } else {
+            panic!("Expected error");
+        }
+    }
+
+    #[test]
+    fn test_parse_channel_retention_invalid_format() {
+        let result = parse_channel_retention("foo".to_owned());
+        if let Err(e) = result {
+            match e.downcast_ref::<ParseChannelConfigError>() {
+                Some(ParseChannelConfigError::InvalidFormat) => {} // Ok
+                _ => panic!("Expected ParseChannelConfigError::InvalidFormat"),
+            };
+        } else {
+            panic!("Expected error");
+        }
+    }
+
+    #[test]
+    fn test_parse_channel_retention_no_duration() {
+        let result = parse_channel_retention("foo:".to_owned());
+        if let Err(e) = result {
+            print!("{:?}", e);
+            match e.downcast_ref::<ParseChannelConfigError>() {
+                Some(ParseChannelConfigError::NoDuration) => {} // Ok
+                _ => panic!("Expected ParseChannelConfigError::NoDurationSuffix"),
+            };
+        } else {
+            panic!("Expected error");
+        }
+    }
 }
