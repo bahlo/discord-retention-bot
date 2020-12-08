@@ -29,9 +29,7 @@ async fn main() -> Result<()> {
     let interval = Duration::minutes(1).to_std()?;
 
     loop {
-        let guilds = client
-            .get_guilds(&GuildPagination::After(GuildId(0)), 1)
-            .await?;
+        let guilds = get_all_guilds(&client).await?;
 
         for guild in guilds {
             info!("Processing guild {}", guild.name);
@@ -43,6 +41,19 @@ async fn main() -> Result<()> {
         info!("Sleeping for {:#?}", interval);
         thread::sleep(interval);
     }
+}
+
+async fn get_all_guilds(client: &Http) -> Result<Vec<GuildInfo>> {
+    let mut last_guild_id = Some(0u64);
+    let mut guilds: Vec<GuildInfo> = vec![];
+    while let Some(after) = last_guild_id {
+        let mut batch = client
+            .get_guilds(&GuildPagination::After(GuildId(after)), 100)
+            .await?;
+        guilds.append(&mut batch);
+        last_guild_id = batch.last().and_then(|guild| Some(*guild.id.as_u64()));
+    }
+    Ok(guilds)
 }
 
 async fn process_guild(
