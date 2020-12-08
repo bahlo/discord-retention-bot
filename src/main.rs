@@ -5,7 +5,7 @@ use log::{error, info};
 use serenity::{
     http::{client::Http, GuildPagination},
     model::{
-        channel::{GuildChannel, Message},
+        channel::{ChannelType, GuildChannel, Message},
         guild::GuildInfo,
         id::GuildId,
     },
@@ -66,33 +66,45 @@ async fn process_guild(
         .await
         .context("Could not get channels")?;
     for channel in channels {
+        if channel.kind != ChannelType::Text {
+            continue;
+        }
+
         let max_age = match channel_retention.get(&channel.name) {
             Some(max_age) => max_age,
             None => {
                 info!(
-                    "Skipping channel {} as there is no configuration",
-                    channel.name
+                    "Skipping channel {} in guild {} as there is no configuration",
+                    channel.name, guild.name
                 );
                 continue;
             }
         };
 
-        if let Err(e) = process_channel(client, &channel, *max_age).await {
-            error!(
+        match process_channel(client, &channel, *max_age).await {
+            Ok(num) => info!(
+                "Deleted {} messages from {} in guild {}",
+                num, channel.name, guild.name
+            ),
+            Err(e) => error!(
                 "Could not process channel {} in guild {}: {:?}",
                 channel.name, guild.name, e
-            )
-        }
+            ),
+        };
     }
     Ok(())
 }
 
-async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duration) -> Result<()> {
+/// Gets all messages from a channel that are older than max_age and deletes
+/// them. Returns the number of messages deleted.
+async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duration) -> Result<u64> {
+    let mut deletion_count = 0;
+
     let first_batch = client
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await
         .context("Could not get messages")?;
-    delete_messages(client, channel, filter_messages(&first_batch, max_age))
+    deletion_count += delete_messages(client, channel, filter_messages(&first_batch, max_age))
         .await
         .context("Could not delete messages")?;
 
@@ -107,13 +119,13 @@ async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duratio
             )
             .await
             .context("Could not get messages")?;
-        delete_messages(client, channel, filter_messages(&batch, max_age))
+        deletion_count += delete_messages(client, channel, filter_messages(&batch, max_age))
             .await
             .context("Could not delete messages")?;
         oldest_msg = batch.last();
     }
 
-    Ok(())
+    Ok(deletion_count)
 }
 
 fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
@@ -125,16 +137,18 @@ fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
         .collect()
 }
 
+/// Delete the messages with the given ids in the given channel. Returns the
+/// number of messages deleted.
 async fn delete_messages(
     client: &Http,
     channel: &GuildChannel,
     message_ids: Vec<u64>,
-) -> Result<()> {
-    for msg_id in message_ids {
+) -> Result<u64> {
+    for msg_id in &message_ids {
         client
-            .delete_message(*channel.id.as_u64(), msg_id)
+            .delete_message(*channel.id.as_u64(), *msg_id)
             .await
             .context("Could not delete message")?;
     }
-    Ok(())
+    Ok(message_ids.len() as u64)
 }
