@@ -6,15 +6,15 @@ use crate::errors::*;
 
 pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>> {
     let mut channel_retention = HashMap::new();
-    for channel in input.split(",") {
-        let parts: Vec<&str> = channel.split(":").collect();
+    for channel in input.split(',') {
+        let parts: Vec<&str> = channel.split(':').collect();
         let channel_name = parts
             .get(0)
-            .and_then(|str| Some(str.to_string()))
+            .map(|str| str.to_string())
             .ok_or(ParseChannelConfigError::InvalidFormat)?;
         let mut channel_duration_str = parts
             .get(1)
-            .and_then(|str| Some(str.to_string()))
+            .map(|str| str.to_string())
             .ok_or(ParseChannelConfigError::InvalidFormat)?;
         let channel_duration = match channel_duration_str
             .pop()

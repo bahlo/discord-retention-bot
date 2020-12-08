@@ -56,7 +56,7 @@ async fn get_all_guilds(client: &Http) -> Result<Vec<GuildInfo>> {
             .get_guilds(&GuildPagination::After(GuildId(after)), 100)
             .await?;
         guilds.append(&mut batch);
-        last_guild_id = batch.last().and_then(|guild| Some(*guild.id.as_u64()));
+        last_guild_id = batch.last().map(|guild| *guild.id.as_u64());
     }
     Ok(guilds)
 }
@@ -134,11 +134,11 @@ async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duratio
     Ok(deletion_count)
 }
 
-fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
+fn filter_messages(messages: &[Message], max_age: Duration) -> Vec<u64> {
     let now = Utc::now();
     messages
-        .into_iter()
-        .filter(|msg| return now.signed_duration_since(msg.timestamp) > max_age)
+        .iter()
+        .filter(|msg| now.signed_duration_since(msg.timestamp) > max_age)
         .map(|msg| *msg.id.as_u64())
         .collect()
 }
