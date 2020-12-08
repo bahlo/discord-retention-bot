@@ -20,6 +20,7 @@ pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration
             .pop()
             .ok_or(ParseChannelConfigError::NoDuration)?
         {
+            'h' => Ok(Duration::hours(channel_duration_str.parse::<i64>()?)),
             'd' => Ok(Duration::days(channel_duration_str.parse::<i64>()?)),
             'w' => Ok(Duration::weeks(channel_duration_str.parse::<i64>()?)),
             other => Err(ParseChannelConfigError::InvalidDurationSuffix(other)),
@@ -35,9 +36,10 @@ mod tests {
 
     #[test]
     fn test_parse_channel_retention_simple() {
-        let channel_retention = parse_channel_retention("foo:1d,bar:1w".to_owned()).unwrap();
-        assert_eq!(channel_retention.get("foo").unwrap(), &Duration::days(1));
-        assert_eq!(channel_retention.get("bar").unwrap(), &Duration::weeks(1));
+        let channel_retention = parse_channel_retention("foo:1h,bar:2d,baz:3w".to_owned()).unwrap();
+        assert_eq!(channel_retention.get("foo").unwrap(), &Duration::hours(1));
+        assert_eq!(channel_retention.get("bar").unwrap(), &Duration::days(2));
+        assert_eq!(channel_retention.get("baz").unwrap(), &Duration::weeks(3));
     }
 
     #[test]
