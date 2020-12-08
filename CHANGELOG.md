@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `thiserror` crate for easier error creation
 ### Changed
 - Unified GitHub Actions workflow
+- Messages are now deleted immediately instead of collecting first
 
 ## [0.1.0] - 2020-12-08
 ### Added

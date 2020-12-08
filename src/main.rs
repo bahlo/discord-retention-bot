@@ -61,7 +61,7 @@ async fn process_guild(
             None => continue,
         };
 
-        if let Err(e) = process_channel(client, guild, &channel, *max_age).await {
+        if let Err(e) = process_channel(client, &channel, *max_age).await {
             error!(
                 "Could not process channel {} in guild {}: {:?}",
                 channel.name, guild.name, e
@@ -71,18 +71,14 @@ async fn process_guild(
     Ok(())
 }
 
-async fn process_channel(
-    client: &Http,
-    guild: &GuildInfo,
-    channel: &GuildChannel,
-    max_age: Duration,
-) -> Result<()> {
+async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duration) -> Result<()> {
     let first_batch = client
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await
         .context("Could not get messages")?;
-
-    let mut message_ids_to_delete: Vec<u64> = filter_messages(&first_batch, max_age);
+    delete_messages(client, channel, filter_messages(&first_batch, max_age))
+        .await
+        .context("Could not delete messages")?;
 
     let mut oldest_msg = first_batch.last();
     let mut batch: Vec<Message> = vec![];
@@ -94,22 +90,10 @@ async fn process_channel(
             )
             .await
             .context("Could not get messages")?;
-        message_ids_to_delete.append(&mut filter_messages(&batch, max_age));
-        oldest_msg = batch.last();
-    }
-
-    info!(
-        "Deleting {} messages from {} in {}",
-        message_ids_to_delete.len(),
-        channel.name,
-        guild.name
-    );
-    // We can't use bulk here as it's limited to the last two weeks only
-    for msg_id in message_ids_to_delete {
-        client
-            .delete_message(*channel.id.as_u64(), msg_id)
+        delete_messages(client, channel, filter_messages(&batch, max_age))
             .await
-            .context("Could not delete message")?;
+            .context("Could not delete messages")?;
+        oldest_msg = batch.last();
     }
 
     Ok(())
@@ -147,4 +131,18 @@ fn filter_messages(messages: &Vec<Message>, max_age: Duration) -> Vec<u64> {
         .filter(|msg| return now.signed_duration_since(msg.timestamp) > max_age)
         .map(|msg| *msg.id.as_u64())
         .collect()
+}
+
+async fn delete_messages(
+    client: &Http,
+    channel: &GuildChannel,
+    message_ids: Vec<u64>,
+) -> Result<()> {
+    for msg_id in message_ids {
+        client
+            .delete_message(*channel.id.as_u64(), msg_id)
+            .await
+            .context("Could not delete message")?;
+    }
+    Ok(())
 }
