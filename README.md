@@ -42,14 +42,17 @@ You can use the provided Docker image at
 
 Configuration is happening via environment variables or an `.env` file:
 
-* `RUST_LOG` defines the log level (I recommend setting this to `discord-retention-bot=info`)
+* `RUST_LOG` defines the log level (I recommend setting this to 
+  `discord-retention-bot=info`)
 * `DISCORD_TOKEN` is the token of your Discord bot
 * `CHANNEL_RETENTION` is a list of channel names and the duration after which
   messages should be deleted, separated by a comma. 
   Example: `general:2w,random:4d` 
   (currently the duration only supports `h`, `d` and `w`, please open an issue 
   if you need another one). Please note that this applies to all guilds your
-  bot is added to.
+  bot is added to
+* `DELETE_PINNED` can be set to `true` or `false` (default). If set to `true`, 
+  pinned messages will also be deleted
 
 ## Troubleshooting
 ### Why is it taking so long?

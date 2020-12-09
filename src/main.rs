@@ -26,6 +26,9 @@ async fn main() -> Result<()> {
         env::var("CHANNEL_RETENTION").context("CHANNEL_RETENTION is unset")?;
     let channel_retention = config::parse_channel_retention(channel_retention_env)
         .context("Could not parse channel retention")?;
+    let delete_pinned = env::var("DELETE_PINNED")
+        .map(|val| val == "true")
+        .unwrap_or(false);
     let client = Http::new_with_token(&discord_token);
     let interval = Duration::minutes(1).to_std()?;
 
@@ -34,7 +37,12 @@ async fn main() -> Result<()> {
 
         let mut guild_futures = FuturesUnordered::new();
         for guild in guilds {
-            guild_futures.push(process_guild(&client, guild, &channel_retention));
+            guild_futures.push(process_guild(
+                &client,
+                guild,
+                &channel_retention,
+                delete_pinned,
+            ));
         }
 
         while let Some(res) = guild_futures.next().await {
@@ -65,6 +73,7 @@ async fn process_guild(
     client: &Http,
     guild: GuildInfo,
     channel_retention: &HashMap<String, Duration>,
+    delete_pinned: bool,
 ) -> Result<()> {
     info!("Processing guild {}", guild.name);
     let channels = client
@@ -87,7 +96,7 @@ async fn process_guild(
             }
         };
 
-        match process_channel(client, &channel, *max_age).await {
+        match process_channel(client, &channel, *max_age, delete_pinned).await {
             Ok(num) => info!(
                 "Deleted {} messages from {} in guild {}",
                 num, channel.name, guild.name
@@ -103,16 +112,25 @@ async fn process_guild(
 
 /// Gets all messages from a channel that are older than max_age and deletes
 /// them. Returns the number of messages deleted.
-async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duration) -> Result<u64> {
+async fn process_channel(
+    client: &Http,
+    channel: &GuildChannel,
+    max_age: Duration,
+    delete_pinned: bool,
+) -> Result<u64> {
     let mut deletion_count = 0;
 
     let first_batch = client
         .get_messages(*channel.id.as_u64(), "?limit=100")
         .await
         .context("Could not get messages")?;
-    deletion_count += delete_messages(client, channel, filter_messages(&first_batch, max_age))
-        .await
-        .context("Could not delete messages")?;
+    deletion_count += delete_messages(
+        client,
+        channel,
+        filter_messages(&first_batch, max_age, delete_pinned),
+    )
+    .await
+    .context("Could not delete messages")?;
 
     let mut oldest_msg_id = first_batch.last().map(|msg| *msg.id.as_u64());
     while let Some(before_msg_id) = oldest_msg_id {
@@ -123,20 +141,25 @@ async fn process_channel(client: &Http, channel: &GuildChannel, max_age: Duratio
             )
             .await
             .context("Could not get messages")?;
-        deletion_count += delete_messages(client, channel, filter_messages(&batch, max_age))
-            .await
-            .context("Could not delete messages")?;
+        deletion_count += delete_messages(
+            client,
+            channel,
+            filter_messages(&batch, max_age, delete_pinned),
+        )
+        .await
+        .context("Could not delete messages")?;
         oldest_msg_id = batch.last().map(|msg| *msg.id.as_u64());
     }
 
     Ok(deletion_count)
 }
 
-fn filter_messages(messages: &[Message], max_age: Duration) -> Vec<u64> {
+fn filter_messages(messages: &[Message], max_age: Duration, delete_pinned: bool) -> Vec<u64> {
     let now = Utc::now();
     messages
         .iter()
         .filter(|msg| now.signed_duration_since(msg.timestamp) > max_age)
+        .filter(|msg| delete_pinned || !msg.pinned)
         .map(|msg| *msg.id.as_u64())
         .collect()
 }
