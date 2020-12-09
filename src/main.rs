@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use chrono::{prelude::*, Duration};
+use chrono::{Duration, Utc};
 use dotenv::dotenv;
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
