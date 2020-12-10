@@ -10,7 +10,7 @@ edition = "2018"
 dotenv = "0.15.0"
 log = "0.4.11"
 env_logger = "0.8.2"
-serenity = { version = "0.9", default-features = false, features = ["http", "model", "rustls_backend"] }
+serenity = "0.9"
 tokio = { version = "0.2", features = ["macros"] }
 chrono = "0.4"
 anyhow = "1.0"
