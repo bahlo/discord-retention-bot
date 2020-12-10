@@ -4,6 +4,7 @@ use dotenv::dotenv;
 use futures::stream::{FuturesUnordered, StreamExt};
 use log::{error, info};
 use serenity::{
+    client::validate_token,
     http::{client::Http, GuildPagination},
     model::{
         channel::{ChannelType, GuildChannel, Message},
@@ -22,13 +23,16 @@ async fn main() -> Result<()> {
     env_logger::init();
 
     let discord_token = env::var("DISCORD_TOKEN").context("DISCORD_TOKEN is unset")?;
-    let channel_retention_env =
-        env::var("CHANNEL_RETENTION").context("CHANNEL_RETENTION is unset")?;
-    let channel_retention = config::parse_channel_retention(channel_retention_env)
+    let channel_retention = env::var("CHANNEL_RETENTION")
+        .context("CHANNEL_RETENTION is unset")
+        .and_then(|channel_retention_env| config::parse_channel_retention(channel_retention_env))
         .context("Could not parse channel retention")?;
     let delete_pinned = env::var("DELETE_PINNED")
         .map(|val| val == "true")
         .unwrap_or(false);
+
+    validate_token(&discord_token).context("Token is invalid")?;
+
     let client = Http::new_with_token(&discord_token);
     let interval = Duration::minutes(1).to_std()?;
 
