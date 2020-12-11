@@ -1,42 +1,56 @@
-# discord-retention-bot 
-![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)
-![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)
+# discord-retention-bot [![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3ACI) [![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3AAudit)
 
-A discord bot that allows you to set a retention for different channels (similar 
-to Slack).
+A bot that allows you to set a message retention for individual Discord text 
+channels.
 
-## Install
-### Preparation
+## Table of contents
+* [Features](#Features)
+* [Preparation](#Preparation)
+* [Installation](#Installation)
+* [Configuration](#Configuration)
+* [Troubleshooting](#Troubleshooting)
+
+## Features
+* Automatically delete messages that are older than a configured time
+* Don't delete pinned messages until configured otherwise
+* Multi channel configuration (e.g. keep messages `#general` for two weeks, but 
+  `#random` for one day)
+
+## Preparation
 Before running your bot you need to create it on Discord:
 
 1. Create a Discord Application in the 
    [Discord Developer Portal](https://discord.com/developers/applications)
-2. Copy the client id from the "General information" tab
-3. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
-   and add your Bot to your discord server.
+2. Go to `Bot` and click `Add Bot` and make sure to uncheck `Public bot`
+3. Copy the `CLIENT ID` from the `General Information` tab
+4. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
+   and add your bot to your Discord server
 
-#### Wait what does 74752 mean?
+### Wait, what does 74752 mean?
 74752 is the bitmask for the following permissions:
+
 * View Channels
 * Manage Messages
 * Read Message History
 
-### Install
+You can verify this by checking these in the Bot Permissions mask on your bots 
+page.
 
-#### Download binary
+## Installation
+
+### Download binary
 Go to the [GitHub Releases](https://github.com/bahlo/discord-retention-bot/releases)
 and download the binary for your architecture.
 
-#### Docker
+### Docker
 You can use the provided Docker image at
 `docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.1`.
 
-#### Install with cargo
-Run `cargo install discord-retention-bot` to install the lates version from 
+### Cargo
+Run `cargo install discord-retention-bot` to install the latest version from 
 [crates.io](https://crates.io).
 
-#### Build from source
-
+### Build from source
 1. Clone the repository with 
    `git clone https://github.com/bahlo/discord-retention-bot`
 2. Run `cargo build --release` to build your binary to 
@@ -44,7 +58,7 @@ Run `cargo install discord-retention-bot` to install the lates version from
 
 ## Configuration
 
-Configuration is happening via environment variables or an `.env` file:
+Configure your bot via environment variables (optionally in an `.env` file):
 
 * `RUST_LOG` defines the log level (I recommend setting this to 
   `discord-retention-bot=info`)
@@ -70,8 +84,3 @@ following permissions:
 * Read Text Channels & See Voice Channels
 * Manage Messages
 * Read Message History
-
-## Built on the shoulders of giants
-Check the Cargo.toml for all packages used in this project. I just want to 
-highlight [serenity](https://github.com/serenity-rs/serenity), a great library
-for interacting with the Discord API.
