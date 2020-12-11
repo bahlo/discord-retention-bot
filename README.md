@@ -1,6 +1,4 @@
-# discord-retention-bot 
-[![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3ACI)
-[![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3AAudit)
+# discord-retention-bot [![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3ACI) [![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3AAudit)
 
 A bot that allows you to set a message retention for individual Discord text 
 channels.
@@ -23,15 +21,20 @@ Before running your bot you need to create it on Discord:
 
 1. Create a Discord Application in the 
    [Discord Developer Portal](https://discord.com/developers/applications)
-2. Copy the client id from the "General information" tab
-3. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
-   and add your Bot to your discord server.
+2. Go to `Bot` and click `Add Bot` and make sure to uncheck `Public bot`
+3. Copy the `CLIENT ID` from the `General Information` tab
+4. Go to <https://discord.com/oauth2/authorize?client_id=$CLIENT_ID&scope=bot&permissions=74752>
+   and add your bot to your Discord server
 
-### Wait what does 74752 mean?
+### Wait, what does 74752 mean?
 74752 is the bitmask for the following permissions:
+
 * View Channels
 * Manage Messages
 * Read Message History
+
+You can verify this by checking these in the Bot Permissions mask on your bots 
+page.
 
 ## Installation
 
@@ -43,7 +46,7 @@ and download the binary for your architecture.
 You can use the provided Docker image at
 `docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.1`.
 
-### Install with cargo
+### Cargo
 Run `cargo install discord-retention-bot` to install the latest version from 
 [crates.io](https://crates.io).
 
