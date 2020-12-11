@@ -52,6 +52,8 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
+      - name: Make sure Cargo.lock is up to date
+        run: git diff --exit-code Cargo.lock
   build_publish:
     name: Build and publish docker container
     runs-on: ubuntu-latest
