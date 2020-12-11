@@ -1,6 +1,6 @@
 # discord-retention-bot 
-![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)
-![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)
+[![CI](https://github.com/bahlo/discord-retention-bot/workflows/CI/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3ACI)
+[![Audit](https://github.com/bahlo/discord-retention-bot/workflows/Audit/badge.svg)](https://github.com/bahlo/discord-retention-bot/actions?query=workflow%3AAudit)
 
 A discord bot that allows you to set a retention for different channels (similar 
 to Slack).
@@ -32,7 +32,7 @@ You can use the provided Docker image at
 `docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.1`.
 
 #### Install with cargo
-Run `cargo install discord-retention-bot` to install the lates version from 
+Run `cargo install discord-retention-bot` to install the latest version from 
 [crates.io](https://crates.io).
 
 #### Build from source
