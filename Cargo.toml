@@ -1,6 +1,6 @@
 [package]
 name = "discord-retention-bot"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Arne Bahlo <hallo@arne.me>"]
 edition = "2018"
 description = "A discord bot that allows you to set a retention for different channels."
