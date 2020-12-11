@@ -29,7 +29,11 @@ and download the binary for your architecture.
 
 #### Docker
 You can use the provided Docker image at
-`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.0`.
+`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.1`.
+
+#### Install with cargo
+Run `cargo install discord-retention-bot` to install the lates version from 
+[crates.io](https://crates.io).
 
 #### Build from source
 

@@ -1,8 +1,13 @@
 [package]
 name = "discord-retention-bot"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["Arne Bahlo <hallo@arne.me>"]
 edition = "2018"
+description = "A discord bot that allows you to set a retention for different channels."
+repository = "https://github.com/bahlo/discord-retention-bot"
+license = "MIT"
+keywords = ["discord", "bot", "retention", "slack"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
