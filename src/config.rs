@@ -1,8 +1,17 @@
 use anyhow::Result;
 use chrono::Duration;
 use std::collections::HashMap;
+use thiserror::Error;
 
-use crate::errors::*;
+#[derive(Error, Debug)]
+pub enum ParseChannelConfigError {
+    #[error("`{0}` is not a valid duration suffix, valid suffixes are: d, w")]
+    InvalidDurationSuffix(char),
+    #[error("duration cannot be empty")]
+    NoDuration,
+    #[error("invalid format")]
+    InvalidFormat,
+}
 
 pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration>> {
     let mut channel_retention = HashMap::new();
