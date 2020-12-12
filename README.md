@@ -15,6 +15,7 @@ channels.
 * Don't delete pinned messages until configured otherwise
 * Multi channel configuration (e.g. keep messages `#general` for two weeks, but 
   `#random` for one day)
+* Default configuration for all channels without definend retention
 
 ## Preparation
 Before running your bot you need to create it on Discord:
@@ -58,19 +59,34 @@ Run `cargo install discord-retention-bot` to install the latest version from
 
 ## Configuration
 
-Configure your bot via environment variables (optionally in an `.env` file):
+Configure your bot via environment variables (optionally in an `.env` file).
 
-* `RUST_LOG` defines the log level (I recommend setting this to 
-  `discord-retention-bot=info`)
-* `DISCORD_TOKEN` is the token of your Discord bot
-* `CHANNEL_RETENTION` is a list of channel names and the duration after which
-  messages should be deleted, separated by a comma. 
-  Example: `general:2w,random:4d` 
-  (currently the duration only supports `h`, `d` and `w`, please open an issue 
-  if you need another one). Please note that this applies to all guilds your
-  bot is added to
-* `DELETE_PINNED` can be set to `true` or `false` (default). If set to `true`, 
-  pinned messages will also be deleted
+### `RUST_LOG` 
+Tihs defines the log level. I recommend setting this to 
+`discord-retention-bot=info` for normal usage.
+
+### `DISCORD_TOKEN` 
+The token of your Discord bot. Get it from the 
+[Discord Developer Portal](https://discord.com/developers) by going to your
+application → Bot and copying the token.
+
+### `DELETE_PINNED` 
+Can be set to `true` or `false`. If set to `true`, pinned messages 
+will also be deleted. Defaults to `false`.
+
+### `CHANNEL_RETENTION` 
+A list of channel names and the duration after which messages should be deleted, 
+separated by a comma. You can also configure `*` to match all unconfigured 
+channnels.
+The duration is a number followed by one of `h` (hours), `d` (days), and `w` 
+(weeks).
+Please note that this configuration applies to all guilds your bot is added to.
+
+#### Example
+`general:2w,random:4d,*:4w` will result in messages being deleted in
+* `general`: after two weeks
+* `random`: after four days
+* every other channel after four weeks
 
 ## Troubleshooting
 ### Why is it taking so long?
