@@ -62,15 +62,13 @@ async fn process_guild(
         .get_channels(*guild.id.as_u64())
         .await
         .context("Could not get channels")?;
+    let default_retention = channel_retention.get("*");
     for channel in channels {
         if channel.kind != ChannelType::Text {
             continue;
         }
 
-        let max_age = match channel_retention
-            .get(&channel.name)
-            .or(channel_retention.get("*")) // Default to * if configured
-        {
+        let max_age = match channel_retention.get(&channel.name).or(default_retention) {
             Some(max_age) => max_age,
             None => {
                 info!(
