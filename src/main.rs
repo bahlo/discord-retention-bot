@@ -89,7 +89,10 @@ async fn process_guild(
             continue;
         }
 
-        let max_age = match channel_retention.get(&channel.name) {
+        let max_age = match channel_retention
+            .get(&channel.name)
+            .or(channel_retention.get("*")) // Default to * if configured
+        {
             Some(max_age) => max_age,
             None => {
                 info!(
