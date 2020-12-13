@@ -183,6 +183,7 @@ mod tests {
     macro_rules! integration_test {
         ($test_name:ident, $test_func:expr) => {
             #[test]
+            #[ignore]
             fn $test_name() {
                 dotenv().ok();
                 let discord_token = env::var("INTEGRATION_DISCORD_TOKEN")
@@ -246,7 +247,7 @@ mod tests {
                 .await?;
             bar_msg.pin(&client.cache_and_http).await?;
 
-            // Sleep 1s
+            // Sleep
             thread::sleep(Duration::seconds(4).to_std()?);
 
             // Add third message
@@ -289,7 +290,7 @@ mod tests {
                 .await?;
             bar_msg.pin(&client.cache_and_http).await?;
 
-            // Sleep 1s
+            // Sleep
             thread::sleep(Duration::seconds(4).to_std()?);
 
             // Add third message
