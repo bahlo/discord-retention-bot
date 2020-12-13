@@ -1,3 +1,5 @@
+#![feature(async_closure)]
+
 use anyhow::{Context, Result};
 use chrono::Duration;
 use dotenv::dotenv;
