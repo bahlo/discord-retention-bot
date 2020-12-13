@@ -272,4 +272,48 @@ mod tests {
             Ok((client, channel))
         }
     );
+
+    integration_test!(
+        test_integration_pinned,
+        async move |client: Client, channel: GuildChannel| -> Result<(Client, GuildChannel)> {
+            let http_client = &client.cache_and_http.http;
+
+            // Add two messages and pin the latter
+            let _foo_msg = channel
+                .id
+                .say(&http_client, MessageBuilder::new().push("foo").build())
+                .await?;
+            let bar_msg = channel
+                .id
+                .say(&http_client, MessageBuilder::new().push("bar").build())
+                .await?;
+            bar_msg.pin(&client.cache_and_http).await?;
+
+            // Sleep 1s
+            thread::sleep(Duration::seconds(4).to_std()?);
+
+            // Add third message
+            let _baz_msg = channel
+                .id
+                .say(&http_client, MessageBuilder::new().push("baz").build())
+                .await?;
+
+            // Process channel
+            let mut channel_retention = HashMap::new();
+            channel_retention.insert(channel.name.clone(), Duration::seconds(2));
+            run(&http_client, &channel_retention, true).await?;
+
+            // Assert we have one message (i.e. the pinned one was deleted as
+            // well)
+            let messages = channel
+                .id
+                .messages(&http_client, |retriever| {
+                    retriever.after(MessageId(0)).limit(2)
+                })
+                .await?;
+            assert_eq!(1, messages.len()); // pinned + newer
+
+            Ok((client, channel))
+        }
+    );
 }
