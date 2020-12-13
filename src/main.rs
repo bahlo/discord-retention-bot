@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     let discord_token = env::var("DISCORD_TOKEN").context("DISCORD_TOKEN is unset")?;
     let channel_retention = env::var("CHANNEL_RETENTION")
         .context("CHANNEL_RETENTION is unset")
-        .and_then(|channel_retention_env| config::parse_channel_retention(channel_retention_env))
+        .and_then(config::parse_channel_retention)
         .context("Could not parse channel retention")?;
     let delete_pinned = env::var("DELETE_PINNED")
         .map(|val| val == "true")
