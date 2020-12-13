@@ -173,7 +173,7 @@ mod tests {
         model::{channel::GuildChannel, id::MessageId},
         utils::MessageBuilder,
     };
-    use std::env;
+    use std::{env, thread};
     use tokio::runtime::Runtime;
 
     use super::*;
@@ -236,7 +236,7 @@ mod tests {
             let http_client = &client.cache_and_http.http;
 
             // Add two messages and pin the latter
-            channel
+            let _foo_msg = channel
                 .id
                 .say(&http_client, MessageBuilder::new().push("foo").build())
                 .await?;
@@ -246,9 +246,18 @@ mod tests {
                 .await?;
             bar_msg.pin(&client.cache_and_http).await?;
 
+            // Sleep 1s
+            thread::sleep(Duration::seconds(4).to_std()?);
+
+            // Add third message
+            let _baz_msg = channel
+                .id
+                .say(&http_client, MessageBuilder::new().push("baz").build())
+                .await?;
+
             // Process channel
             let mut channel_retention = HashMap::new();
-            channel_retention.insert(channel.name.clone(), Duration::seconds(0));
+            channel_retention.insert(channel.name.clone(), Duration::seconds(2));
             run(&http_client, &channel_retention, false).await?;
 
             // Assert we only have one message (the pinned one)
@@ -258,7 +267,7 @@ mod tests {
                     retriever.after(MessageId(0)).limit(2)
                 })
                 .await?;
-            assert_eq!(1, messages.len());
+            assert_eq!(2, messages.len()); // pinned + newer
 
             Ok((client, channel))
         }
