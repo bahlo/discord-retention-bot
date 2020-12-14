@@ -100,3 +100,15 @@ following permissions:
 * Read Text Channels & See Voice Channels
 * Manage Messages
 * Read Message History
+
+## Contributing
+To run integration tests you need to create a bot (see 
+[Preparation](#Preparation)), but with the bitmask 76816, which translates to:
+
+* Manage Channels
+* View Channels
+* Send Messages
+* Manage Messages
+* Read Message History
+
+Export the bot token to `INTEGRATION_DISCORD_TOKEN` and run `cargo test`.

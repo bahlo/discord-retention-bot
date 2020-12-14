@@ -20,7 +20,8 @@ pub fn parse_channel_retention(input: String) -> Result<HashMap<String, Duration
         let channel_name = parts
             .get(0)
             .map(|str| str.to_string())
-            .ok_or(ParseChannelConfigError::InvalidFormat)?;
+            .ok_or(ParseChannelConfigError::InvalidFormat)?
+            .to_lowercase();
         let mut channel_duration_str = parts
             .get(1)
             .map(|str| str.to_string())
@@ -45,7 +46,7 @@ mod tests {
 
     #[test]
     fn test_parse_channel_retention_simple() {
-        let channel_retention = parse_channel_retention("foo:1h,bar:2d,baz:3w".to_owned()).unwrap();
+        let channel_retention = parse_channel_retention("FOO:1h,bar:2d,baz:3w".to_owned()).unwrap();
         assert_eq!(channel_retention.get("foo").unwrap(), &Duration::hours(1));
         assert_eq!(channel_retention.get("bar").unwrap(), &Duration::days(2));
         assert_eq!(channel_retention.get("baz").unwrap(), &Duration::weeks(3));

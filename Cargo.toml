@@ -15,9 +15,12 @@ categories = ["command-line-utilities"]
 dotenv = "0.15.0"
 log = "0.4.11"
 env_logger = "0.8.2"
-serenity = "0.9"
+serenity = { version = "0.9", default-features = false, features = ["builder", "client", "gateway", "http", "model", "rustls_backend"] }
 tokio = { version = "0.2", features = ["macros"] }
 chrono = "0.4"
 anyhow = "1.0"
 thiserror = "1.0"
 futures = "0.3"
+tokio-test = "0.3"
+serde_json = "1.0"
+rand = "0.7"

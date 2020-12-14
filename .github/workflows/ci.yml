@@ -10,8 +10,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v1
-      - name: Install clippy
-        run: rustup component add clippy
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            components: clippy
+            override: true
       - name: Run clippy check
         uses: actions-rs/clippy-check@v1
         with:
@@ -23,29 +26,47 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install latest stable
+      - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: nightly
             override: true
-            components: rustfmt, clippy
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
+  integration:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
+        with:
+            toolchain: nightly
+            override: true
+      - name: Run cargo test
+        uses: actions-rs/cargo@v1
+        env: 
+          INTEGRATION_DISCORD_TOKEN: ${{ secrets.INTEGRATION_DISCORD_TOKEN }}
+        with:
+          command: test
+          args: -- --ignored
   build:
     name: Build binary
     runs-on: ubuntu-latest
     needs:
       - clippy_check
       - test
+      - integration
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install latest stable
+      - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: nightly
             override: true
             components: rustfmt, clippy
       - name: Run cargo build
@@ -61,6 +82,7 @@ jobs:
     needs:
       - clippy_check
       - test
+      - integration
       - build
     steps:
       - name: Checkout code
@@ -85,14 +107,15 @@ jobs:
     needs:
       - clippy_check
       - test
+      - integration
       - build
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install latest stable
+      - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: nightly
             override: true
             components: rustfmt, clippy
       - name: Run cargo build
@@ -127,14 +150,15 @@ jobs:
     needs:
       - clippy_check
       - test
+      - integration
       - build
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Install latest stable
+      - name: Install latest nightly
         uses: actions-rs/toolchain@v1
         with:
-            toolchain: stable
+            toolchain: nightly
             override: true
       - name: Run cargo login
         uses: actions-rs/cargo@v1
