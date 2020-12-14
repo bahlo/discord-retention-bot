@@ -75,6 +75,20 @@ jobs:
           command: build
       - name: Make sure Cargo.lock is up to date
         run: git diff --exit-code Cargo.lock
+  container:
+    name: Build docker container
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' && !startsWith(github.ref, 'refs/tags') # Run only branches (tags and main will build and publish)
+    needs:
+      - clippy_check
+      - test
+      - integration
+      - build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build docker container
+        run: docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:branch .
   build_publish:
     name: Build and publish docker container
     runs-on: ubuntu-latest
