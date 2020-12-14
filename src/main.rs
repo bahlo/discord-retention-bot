@@ -7,10 +7,8 @@ use log::info;
 use serenity::{client::validate_token, http::client::Http};
 use std::{env, thread};
 
+mod bot;
 mod config;
-mod run;
-
-use run::run;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,7 +32,7 @@ async fn main() -> Result<()> {
 
     // Main loop
     loop {
-        run(&client, &channel_retention, delete_pinned).await?;
+        bot::run(&client, &channel_retention, delete_pinned).await?;
         info!("Sleeping for {:#?}", interval);
         thread::sleep(interval);
     }
