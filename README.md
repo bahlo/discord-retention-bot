@@ -4,11 +4,12 @@ A bot that allows you to set a message retention for individual Discord text
 channels.
 
 ## Table of contents
-* [Features](#Features)
-* [Preparation](#Preparation)
-* [Installation](#Installation)
-* [Configuration](#Configuration)
-* [Troubleshooting](#Troubleshooting)
+* [Features](#features)
+* [Preparation](#preparation)
+* [Installation](#installation)
+* [Configuration](#configuration)
+* [Troubleshooting](#troubleshooting)
+* [Running integration tests](#running-integration-tests)
 
 ## Features
 * Automatically delete messages that are older than a configured time
@@ -101,7 +102,7 @@ following permissions:
 * Manage Messages
 * Read Message History
 
-## Contributing
+## Running integration tests
 To run integration tests you need to create a bot (see 
 [Preparation](#Preparation)), but with the bitmask 76816, which translates to:
 
@@ -111,4 +112,4 @@ To run integration tests you need to create a bot (see
 * Manage Messages
 * Read Message History
 
-Export the bot token to `INTEGRATION_DISCORD_TOKEN` and run `cargo test`.
+Export the bot token to `INTEGRATION_DISCORD_TOKEN` and run `cargo test -- --ignored` to run the integration tests.
