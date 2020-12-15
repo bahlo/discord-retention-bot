@@ -9,7 +9,7 @@ channels.
 * [Installation](#installation)
 * [Configuration](#configuration)
 * [Troubleshooting](#troubleshooting)
-* [Running integration tests](#running-integration-tests)
+* [Integration tests](#integration-tests)
 
 ## Features
 * Automatically delete messages that are older than a configured time
@@ -46,7 +46,7 @@ and download the binary for your architecture.
 
 ### Docker
 You can use the provided Docker image at
-`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.1`.
+`docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:1.0.2`.
 
 ### Cargo
 Run `cargo install discord-retention-bot` to install the latest version from 
@@ -102,7 +102,7 @@ following permissions:
 * Manage Messages
 * Read Message History
 
-## Running integration tests
+## Integration tests
 To run integration tests you need to create a bot (see 
 [Preparation](#Preparation)), but with the bitmask 76816, which translates to:
 
