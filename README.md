@@ -9,7 +9,7 @@ channels.
 * [Installation](#installation)
 * [Configuration](#configuration)
 * [Troubleshooting](#troubleshooting)
-* [Running integration tests](#running-integration-tests)
+* [Integration tests](#integration-tests)
 
 ## Features
 * Automatically delete messages that are older than a configured time
@@ -102,7 +102,7 @@ following permissions:
 * Manage Messages
 * Read Message History
 
-## Running integration tests
+## Integration tests
 To run integration tests you need to create a bot (see 
 [Preparation](#Preparation)), but with the bitmask 76816, which translates to:
 
