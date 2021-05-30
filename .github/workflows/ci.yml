@@ -88,7 +88,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Build docker container
-        run: docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:branch .
+        run: docker build -t ghcr.io/${GITHUB_REPOSITORY}/discord-retention-bot:branch .
   build_publish:
     name: Build and publish docker container
     runs-on: ubuntu-latest
@@ -101,19 +101,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Login
-        run: docker login docker.pkg.github.com -u bahlo -p "${{ secrets.GITHUB_TOKEN }}"
+      - name: Login to GitHub Container Registry
+        run: docker login ghcr.io -u ${GITHUB_ACTOR} -p "${{ secrets.GITHUB_TOKEN }}"
       - name: Build and publish docker latest
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:latest .
-          docker push docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:latest
+          docker build -t ghcr.io/${GITHUB_REPOSITORY}/discord-retention-bot:latest .
+          docker push ghcr.io/${GITHUB_REPOSITORY}/discord-retention-bot:latest
       - name: Build and publish docker tag
         if: startsWith(github.ref, 'refs/tags')
         run: |
           export TAG=$(echo "${{ github.ref }}" | sed 's/^refs\/tags\/v//g')
-          docker build -t docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:$TAG .
-          docker push docker.pkg.github.com/bahlo/discord-retention-bot/discord-retention-bot:$TAG
+          docker build -t ghcr.io/${GITHUB_REPOSITORY}/discord-retention-bot:$TAG .
+          docker push ghcr.io/${GITHUB_REPOSITORY}/discord-retention-bot:$TAG
   create_release_upload_assets:
     name: Create release and upload assets
     runs-on: ubuntu-latest
@@ -147,7 +147,7 @@ jobs:
           release_name: ${{ github.ref }}
           draft: false
           prerelease: false
-          body: See [CHANGELOG.md](https://github.com/bahlo/discord-retention-bot/blob/main/CHANGELOG.md)
+          body: See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/main/CHANGELOG.md)
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env: 
