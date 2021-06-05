@@ -17,14 +17,14 @@ pub async fn run(
     channel_retention: &HashMap<String, Duration>,
     delete_pinned: bool,
 ) -> Result<()> {
-    let guilds = get_all_guilds(&client).await?;
+    let guilds = get_all_guilds(client).await?;
 
     let mut guild_futures = FuturesUnordered::new();
     for guild in guilds {
         guild_futures.push(process_guild(
-            &client,
+            client,
             guild,
-            &channel_retention,
+            channel_retention,
             delete_pinned,
         ));
     }
