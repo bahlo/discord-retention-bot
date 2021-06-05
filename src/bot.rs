@@ -174,11 +174,20 @@ mod tests {
         utils::MessageBuilder,
     };
     use std::{env, thread};
+    use std::sync::Once;
     use tokio::runtime::Runtime;
 
     use super::*;
 
     const CHANNEL_NAME_CHARSET: &[u8] = b"abcdefghijklmnopqrstuvwxyz0123456789";
+
+    static INIT: Once = Once::new();
+
+    fn setup_logger() {
+        INIT.call_once(|| {
+            env_logger::init();
+        });
+    }
 
     macro_rules! integration_test {
         ($test_name:ident, $test_func:expr) => {
@@ -186,6 +195,7 @@ mod tests {
             #[ignore]
             fn $test_name() {
                 dotenv().ok();
+                setup_logger();
                 let discord_token = env::var("INTEGRATION_DISCORD_TOKEN")
                     .expect("INTEGRATION_DISCORD_TOKEN is unset");
                 validate_token(&discord_token).expect("Token is invalid");
