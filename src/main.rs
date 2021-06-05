@@ -21,6 +21,10 @@ async fn main() -> Result<()> {
         .context("CHANNEL_RETENTION is unset")
         .and_then(config::parse_channel_retention)
         .context("Could not parse channel retention")?;
+    let def_retention = Duration::weeks(50);
+    let min_retention = channel_retention.values().min()
+        .unwrap_or(&def_retention);
+    info!("Minimum retention interval {} hours", min_retention.num_hours());
     let delete_pinned = env::var("DELETE_PINNED")
         .map(|val| val == "true")
         .unwrap_or(false);
@@ -28,7 +32,8 @@ async fn main() -> Result<()> {
 
     let client = Http::new_with_token(&discord_token);
 
-    let mut interval = time::interval(Duration::minutes(1).to_std()?);
+    let tick_duration = Duration::minutes(min_retention.num_minutes() / 10);
+    let mut interval = time::interval(tick_duration.to_std()?);
     interval.tick().await; // the first tick completes immediately
 
     loop {
