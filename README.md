@@ -113,3 +113,10 @@ To run integration tests you need to create a bot (see
 * Read Message History
 
 Export the bot token to `INTEGRATION_DISCORD_TOKEN` and run `cargo test -- --ignored` to run the integration tests.
+
+Your bot will need to connect (just once, not each time you run the tests) to a
+Discord gateway in order to [send the
+messages](https://discord.com/developers/docs/resources/channel#create-message)
+that the test deletes (otherwise, you'll see a 40001 Unauthorized JSON error).
+You can do this by just making a quick script that calls
+[serenity::Client::start](https://docs.rs/serenity/0.10.7/serenity/client/struct.Client.html#method.start).
